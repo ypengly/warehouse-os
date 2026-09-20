@@ -1,0 +1,58 @@
+spring:
+  application:
+    name: warehouseos
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/warehouseos}
+    username: ${DATABASE_USERNAME:warehouseos}
+    password: ${DATABASE_PASSWORD:warehouseos}
+    hikari:
+      maximum-pool-size: ${DB_POOL_SIZE:15}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+          batch_size: 50
+        order_inserts: true
+        order_updates: true
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  jackson:
+    default-property-inclusion: non_null
+
+server:
+  port: ${SERVER_PORT:8080}
+  error:
+    include-stacktrace: never
+
+app:
+  jwt:
+    # Dev-only fallback. MUST be overridden in any real deployment.
+    secret: ${JWT_SECRET:ZGV2LW9ubHktc2VjcmV0LWNoYW5nZS1tZS1wbGVhc2UtMzJieXRlcyE=}
+    issuer: warehouseos
+    access-token-ttl: ${JWT_ACCESS_TTL:PT15M}
+    refresh-token-ttl: ${JWT_REFRESH_TTL:P7D}
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000}
+  seed:
+    enabled: ${SEED_ENABLED:true}
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: alpha
+
+logging:
+  level:
+    org.springframework.security: INFO
+    com.warehouseos: DEBUG
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

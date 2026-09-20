@@ -1,0 +1,8 @@
+app:
+  seed:
+    enabled: false
+  jwt:
+    secret: dGVzdC1vbmx5LXNlY3JldC1rZXktdGhhdC1pcy0zMi1ieXRlcyE=
+logging:
+  level:
+    org.hibernate.SQL: WARN

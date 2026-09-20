@@ -1,0 +1,39 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${DATABASE_NAME:-warehouseos}
+      POSTGRES_USER: ${DATABASE_USERNAME:-warehouseos}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-warehouseos}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "${DATABASE_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USERNAME:-warehouseos}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: jdbc:postgresql://postgres:5432/${DATABASE_NAME:-warehouseos}
+      DATABASE_USERNAME: ${DATABASE_USERNAME:-warehouseos}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD:-warehouseos}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set - see .env.example}
+      SEED_ENABLED: ${SEED_ENABLED:-true}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:5173}
+    ports:
+      - "${BACKEND_PORT:-8080}:8080"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres-data:
